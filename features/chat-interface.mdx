@@ -1,0 +1,78 @@
+---
+title: "AlonsoChatBot chat interface: layout and visual design"
+description: "Explore how AlonsoChatBot renders messages, timestamps, and animations across a glassmorphism-styled chat interface that works on any screen size."
+---
+
+AlonsoChatBot presents a single-page chat interface built around a frosted-glass aesthetic. Three animated background blobs move slowly behind the chat panel, creating depth without distracting from the conversation. The main container (`.chat-container`) uses the `.glass` class — a `backdrop-filter: blur(12px)` layer over a near-transparent dark background — giving the whole layout a polished, translucent appearance.
+
+## Layout sections
+
+The interface is divided into three vertical regions stacked inside a flex column:
+
+| Section | HTML element | CSS class | Role |
+|---|---|---|---|
+| Header | `<header>` | `.chat-header` | Displays bot identity and the settings button |
+| Messages area | `<section>` | `.messages-area` | Scrollable list of all chat messages |
+| Input footer | `<footer>` | `.chat-footer` | Text input and send button |
+
+The container holds a fixed maximum width of `500px` and a height of `85vh`, so it stays compact on large monitors while filling most of the screen on mobile.
+
+## Header
+
+The header shows three things side by side: the bot avatar, the bot name and status, and the settings gear button on the far right.
+
+- **Bot avatar** (`.bot-avatar.glass-content`): a 45×45 px rounded square containing a Lucide `bot` icon tinted in indigo (`--primary: #6366f1`).
+- **Bot name**: an `<h1>` reading "AlonsoChatBot" at `1.1rem` with semibold weight.
+- **Online status**: a small label with an animated green `.pulse` dot. The dot uses a CSS `pulse` keyframe that scales between `0.95` and `1.0` while fading a green glow, repeating every two seconds. This signals that the bot is ready to receive messages.
+- **Settings button** (`.settings-btn`): a borderless icon button on the right. It opens the settings modal when clicked.
+
+## Messages area
+
+The `.messages-area` section is a flex column with `overflow-y: auto` and a thin custom scrollbar (`scrollbar-width: thin`). Each new message is appended at the bottom, and the area scrolls smoothly to the latest entry after every addition.
+
+Every message bubble is a `<div>` with the `.message` class plus either `.bot` or `.user`, and the shared `.glass-content` style:
+
+| Class | Alignment | Background | Corner treatment |
+|---|---|---|---|
+| `.message.user` | Right (`align-self: flex-end`) | Solid indigo (`--primary: #6366f1`) | Bottom-right corner flattened to `4px` |
+| `.message.bot` | Left (`align-self: flex-start`) | Dark semi-transparent (`--bot-msg: rgba(30,41,59,0.7)`) | Bottom-left corner flattened to `4px` |
+
+Each bubble contains a `<p>` for the message text and a `<span class="time">` below it. Timestamps are generated from the browser clock at the moment `addMessage()` runs:
+
+```javascript
+const now = new Date();
+const timeStr = now.getHours() + ':' + now.getMinutes().toString().padStart(2, '0');
+```
+
+The result is a 24-hour `HH:MM` string (for example, `14:05`) displayed at `0.65rem` with `60%` opacity, keeping it visible but unobtrusive.
+
+New bubbles enter with a `slideIn` animation: they fade in from `opacity: 0` and shift up `10px` over `0.3s`, giving the conversation a natural flow.
+
+## Typing indicator
+
+While the app waits for the Groq API to respond, `showTypingIndicator()` appends a bot-style bubble with the text "Escribiendo" followed by three animated `<span>` dots. Each dot uses the `blink` keyframe, staggered by `0.2s` increments:
+
+```javascript
+function showTypingIndicator() {
+    const typingDiv = document.createElement('div');
+    typingDiv.id = 'typingIndicator';
+    typingDiv.classList.add('message', 'bot', 'glass-content');
+    typingDiv.innerHTML = `<p class="typing">Escribiendo<span>.</span><span>.</span><span>.</span></p>`;
+    messagesArea.appendChild(typingDiv);
+    messagesArea.scrollTop = messagesArea.scrollHeight;
+}
+```
+
+The dots cycle between `opacity: 0.2` and `opacity: 1` over `1.4s`, producing a wave-like pulsing effect. Once the API response arrives, `removeTypingIndicator()` removes the element by its `id` before rendering the actual reply.
+
+## Input footer
+
+The footer holds a `<form>` (`.input-wrapper`) styled with the `.glass` class — a frosted pill shape. Inside it sits a full-width text `<input>` with placeholder "Escribe un mensaje..." and a circular indigo send button (`.send-btn`). On hover, the button lifts slightly (`translateY(-2px)`) and gains a glowing shadow using `--primary-glow: rgba(99,102,241,0.5)`. On click it briefly scales down to `0.95`.
+
+## Responsive behavior
+
+The `.chat-container` uses `width: 90%` with `max-width: 500px`, so it scales down on narrower viewports without horizontal overflow. The `85vh` height keeps the interface within the visible area on phones. No media queries are needed — the flex layout adapts automatically.
+
+## Background blobs
+
+Three `.blob` elements sit in a `.blob-container` behind the chat panel (`z-index: -1`, `filter: blur(80px)`). Each blob is a colored circle that drifts via the `move` keyframe (translating `50px` and scaling to `1.1` over `20s`, alternating direction). Their colors — indigo, purple, and sky blue — complement the primary palette without obscuring the glass panels layered above them.

@@ -1,0 +1,147 @@
+---
+title: "Customize AlonsoChatBot colors, layout, and typography"
+description: "Change accent colors, background blobs, glassmorphism intensity, fonts, and container sizing by editing CSS custom properties in style.css."
+---
+
+AlonsoChatBot's visual appearance is controlled almost entirely through CSS custom properties defined in `style.css`. You can change the accent color, background, message bubble colors, and more by updating a single block at the top of that file. The layout also lets you adjust the chat container size and the animated background blobs independently.
+
+## CSS variables
+
+All color and opacity values are declared as custom properties in the `:root` selector. Changing a value here propagates it throughout the entire UI automatically.
+
+```css
+:root {
+    --primary: #6366f1;
+    --primary-glow: rgba(99, 102, 241, 0.5);
+    --bg-dark: #0f172a;
+    --glass-bg: rgba(255, 255, 255, 0.05);
+    --glass-border: rgba(255, 255, 255, 0.1);
+    --text-main: #f8fafc;
+    --text-dim: #94a3b8;
+    --bot-msg: rgba(30, 41, 59, 0.7);
+    --user-msg: rgba(99, 102, 241, 0.2);
+}
+```
+
+The table below describes what each variable controls and its default value.
+
+| Variable | Default | Controls |
+|---|---|---|
+| `--primary` | `#6366f1` | Accent color: user message bubble background, send button background, focus ring on inputs |
+| `--primary-glow` | `rgba(99, 102, 241, 0.5)` | Drop shadow on the send button when hovered |
+| `--bg-dark` | `#0f172a` | Page background color, visible behind the glass panel |
+| `--glass-bg` | `rgba(255, 255, 255, 0.05)` | Background opacity of glass panels (chat container, modals) |
+| `--glass-border` | `rgba(255, 255, 255, 0.1)` | Border color of glass panels and scrollbar thumb |
+| `--text-main` | `#f8fafc` | Primary text color used for message content and input text |
+| `--text-dim` | `#94a3b8` | Secondary text color used for timestamps, labels, and placeholder text |
+| `--bot-msg` | `rgba(30, 41, 59, 0.7)` | Bot message bubble background |
+| `--user-msg` | `rgba(99, 102, 241, 0.2)` | Defined but available for custom use; user bubbles currently use `--primary` directly |
+
+## Changing the accent color
+
+The accent color (`--primary`) affects the send button, user message bubbles, and input focus state. When you change it, also update `--primary-glow` to a semi-transparent version of the same color so the hover shadow matches.
+
+For example, to switch to an emerald green accent:
+
+```css
+:root {
+    --primary: #10b981;
+    --primary-glow: rgba(16, 185, 129, 0.5);
+    --user-msg: rgba(16, 185, 129, 0.2);
+}
+```
+
+<Tip>
+  Keep the alpha value on `--primary-glow` between `0.4` and `0.6` for a glow that is visible but not overwhelming.
+</Tip>
+
+## Animated background blobs
+
+Three blurred circular elements sit behind the chat panel and animate continuously. Their colors are set directly on each `.blob` selector rather than through CSS variables:
+
+```css
+.blob:nth-child(1) {
+    width: 400px;
+    height: 400px;
+    background: #4f46e5; /* indigo */
+    top: -100px;
+    left: -100px;
+}
+
+.blob:nth-child(2) {
+    width: 300px;
+    height: 300px;
+    background: #9333ea; /* purple */
+    bottom: -50px;
+    right: -50px;
+    animation-delay: -5s;
+}
+
+.blob:nth-child(3) {
+    width: 350px;
+    height: 350px;
+    background: #0ea5e9; /* sky blue */
+    top: 50%;
+    left: 40%;
+    animation-delay: -10s;
+}
+```
+
+Each blob is blurred at the container level using `filter: blur(80px)` on `.blob-container`, which creates the soft diffused glow. Change the `background` value on each blob to shift the ambient color palette. The `animation-delay` offsets keep the blobs moving out of phase with each other — leave those values in place when recoloring.
+
+## Glassmorphism effect
+
+The chat panel, modals, and input bar all use the `.glass` class, which applies a frosted-glass effect:
+
+```css
+.glass {
+    background: var(--glass-bg);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid var(--glass-border);
+    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+}
+```
+
+The `backdrop-filter: blur(12px)` blurs whatever is rendered behind the element — in this case, the animated blobs. Increasing the blur value makes the panel look more frosted; decreasing it makes the blobs more visible through the panel. You can also raise `--glass-bg` opacity (e.g. `rgba(255, 255, 255, 0.1)`) to make the panel lighter.
+
+## Chat container sizing
+
+The chat panel dimensions are controlled by `.chat-container`:
+
+```css
+.chat-container {
+    width: 90%;
+    max-width: 500px;
+    height: 85vh;
+    border-radius: 24px;
+}
+```
+
+`width: 90%` makes the panel responsive on small screens, and `max-width: 500px` caps it on wider displays. To make the chat wider on desktop, increase `max-width`:
+
+```css
+.chat-container {
+    max-width: 700px;
+}
+```
+
+To change how tall the panel is relative to the viewport, adjust `height`. A value of `100vh` makes the chat fill the full screen height.
+
+## Typography
+
+AlonsoChatBot loads the **Outfit** typeface from Google Fonts, in weights 300, 400, and 600. The import is in `index.html`:
+
+```html
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600&display=swap" rel="stylesheet">
+```
+
+The font is applied globally via the universal selector in `style.css`:
+
+```css
+* {
+    font-family: 'Outfit', sans-serif;
+}
+```
+
+To switch fonts, replace the Google Fonts URL in `index.html` with a different family and update the `font-family` value in `style.css` to match.

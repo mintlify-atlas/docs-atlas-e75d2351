@@ -1,0 +1,38 @@
+---
+title: "AlonsoChatBot — Browser-Based AI Chatbot with Groq"
+description: "AlonsoChatBot is a serverless AI chatbot running entirely in your browser, powered by the Groq API and LLaMA 3.1 — no install or server required."
+---
+
+AlonsoChatBot is a pure browser application that lets you have real-time conversations with a LLaMA 3.1-powered AI assistant — no server, no build step, and no package manager required. You open `index.html`, paste your Groq API key once, and the bot is ready to chat. Your key is saved in `localStorage` so you never have to enter it again, and a full session conversation history is maintained in memory so the bot remembers everything you've said during the current tab session.
+
+<CardGroup cols={2}>
+  <Card title="Glassmorphism UI" icon="paintbrush">
+    A dark-mode interface built with animated background blobs, frosted-glass panels, and smooth slide-in message animations — all written in plain CSS with no framework.
+  </Card>
+  <Card title="Session memory" icon="brain">
+    Every message you send and every reply the bot gives is stored in a `messages[]` array and sent with each request, giving the model full context of the current conversation.
+  </Card>
+  <Card title="Customizable personality" icon="sliders">
+    Open the **Settings** modal to rewrite the system prompt at any time. The change takes effect immediately on your next message without reloading the page.
+  </Card>
+  <Card title="No server needed" icon="globe">
+    The app makes direct `fetch` calls from the browser to `https://api.groq.com/openai/v1/chat/completions`. You can run it by simply double-clicking `index.html` or serving it with any static file server.
+  </Card>
+</CardGroup>
+
+## How it works
+
+When you load the page, `app.js` checks `localStorage` for a stored key under `GROQ_API_KEY`. If no key is found, a setup overlay appears asking you to paste your key. Once saved, every message you type is appended to the `messages[]` array and sent to the Groq API using the `llama-3.1-8b-instant` model at `temperature: 0.7`. The response is appended to both the array (for future context) and the chat UI (for display).
+
+<Note>
+  A Groq API key is completely free. You can create one at [console.groq.com/keys](https://console.groq.com/keys) with no credit card required. Free-tier rate limits are generous enough for personal and development use.
+</Note>
+
+## Prerequisites
+
+Before you start, make sure you have:
+
+- A modern browser (Chrome, Firefox, Safari, or Edge)
+- A free Groq API key (starts with `gsk_`)
+
+Ready to get running in under two minutes? Head to the [Quickstart](/quickstart).

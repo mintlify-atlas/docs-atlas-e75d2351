@@ -1,0 +1,74 @@
+---
+title: "Using the AlonsoChatBot settings panel and chat controls"
+description: "Open the settings modal to edit the bot's system prompt or clear the entire conversation history, with changes taking effect immediately on save."
+---
+
+The settings panel gives you direct control over two aspects of AlonsoChatBot: the personality that shapes every response, and the option to wipe the current conversation and start fresh. You access it through a gear icon in the chat header — no page reload or external configuration required.
+
+## Opening and using settings
+
+<Steps>
+  <Step title="Open the settings modal">
+    Click the gear icon (rendered by Lucide's `settings` icon) in the top-right corner of the chat header. The modal slides in over a blurred dark overlay, centered on screen.
+  </Step>
+  <Step title="Edit the bot personality">
+    The first field, labeled "Personalidad del Bot:", contains a textarea pre-filled with the current system prompt. Edit the text to change how the bot introduces itself, what language it uses, its tone, or any behavioral instructions. See [Bot Personality](/configuration/bot-personality) for guidance on writing effective system prompts.
+  </Step>
+  <Step title="Save your changes">
+    Click **Guardar Cambios** (Save Changes). This updates `messages[0].content` in memory and closes the modal. All subsequent API requests will use the new system prompt immediately — no refresh needed.
+  </Step>
+  <Step title="Clear chat history (optional)">
+    If you want to erase the conversation, click **Borrar Historial de Chat**. A browser `confirm()` dialog appears asking you to confirm the action. Confirming wipes all messages except the system prompt and replaces the message area with a fresh greeting from the bot.
+  </Step>
+  <Step title="Close without saving">
+    Click the **X** button in the modal header, or click anywhere outside the modal overlay. The modal closes and no changes are applied.
+  </Step>
+</Steps>
+
+## Settings panel options
+
+| Option | Element | What it does |
+|---|---|---|
+| Bot personality | `<textarea id="systemPrompt">` | Edits the system prompt sent on every API request |
+| Clear chat history | `.danger-btn` | Resets the message history to just the system prompt |
+| Save | `.primary-btn` ("Guardar Cambios") | Applies the edited system prompt and closes the modal |
+| Close | `.close-btn` (X icon) | Discards unsaved changes and closes the modal |
+
+## How saving works
+
+When you click **Guardar Cambios**, the handler reads the textarea value and writes it directly into the messages array:
+
+```javascript
+saveSettings.addEventListener('click', () => {
+    const newPrompt = systemPromptInput.value.trim();
+    if (newPrompt) {
+        messages[0].content = newPrompt;
+        settingsModal.style.display = 'none';
+    }
+});
+```
+
+The update is in-memory only. If you refresh the page, the system prompt reverts to the hardcoded default defined at the top of `app.js`.
+
+## How clearing chat works
+
+```javascript
+clearChat.addEventListener('click', () => {
+    if (confirm("¿Estás seguro de que quieres borrar toda la conversación?")) {
+        messages = [messages[0]];
+        messagesArea.innerHTML = `
+            <div class="message bot glass-content">
+                <p>¡Historial borrado! Soy AlonsoChatBot, ¿en qué puedo ayudarte?</p>
+                <span class="time">Ahora</span>
+            </div>
+        `;
+        settingsModal.style.display = 'none';
+    }
+});
+```
+
+The array is replaced with a new single-element array containing only the current system prompt (`messages[0]`). The DOM is reset to show a fresh welcome message. The settings modal closes automatically after clearing.
+
+<Warning>
+Clearing chat history is irreversible. Once you confirm the dialog, all previous messages are gone from memory and cannot be recovered. The action does not affect the system prompt — only the conversation turns are deleted.
+</Warning>

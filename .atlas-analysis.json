@@ -1,0 +1,47 @@
+{
+  "projectType": "frontend",
+  "projectName": "AlonsoChatBot",
+  "projectDescription": "A browser-based AI chatbot powered by the Groq API and LLaMA 3.1, featuring a glassmorphism UI, session memory, and a customizable bot personality.",
+  "theme": "willow",
+  "primaryColor": "#6366f1",
+  "lightColor": null,
+  "darkColor": "#0f172a",
+  "navigation": {
+    "groups": [
+      {
+        "group": "Get Started",
+        "pages": ["introduction", "quickstart"]
+      },
+      {
+        "group": "Configuration",
+        "pages": ["configuration/api-key", "configuration/bot-personality"]
+      },
+      {
+        "group": "Features",
+        "pages": ["features/chat-interface", "features/session-memory", "features/settings"]
+      },
+      {
+        "group": "Customization",
+        "pages": ["customization/styling", "customization/system-prompt"]
+      }
+    ]
+  },
+  "keyFeatures": [
+    "Groq API integration with llama-3.1-8b-instant model",
+    "Glassmorphism UI with animated background blobs",
+    "Session memory to maintain conversation context",
+    "Customizable bot personality via system prompt",
+    "API key stored securely in localStorage",
+    "Typing indicator with animated dots",
+    "Clear chat history with confirmation",
+    "Responsive design for mobile and desktop"
+  ],
+  "publicApiSurface": [
+    "getAIResponse(prompt) — sends user message to Groq API and returns bot reply",
+    "addMessage(text, sender) — renders a chat bubble in the messages area",
+    "showTypingIndicator() — displays animated typing indicator",
+    "removeTypingIndicator() — removes typing indicator",
+    "localStorage key: GROQ_API_KEY — stores the user's Groq API key",
+    "messages[] — in-memory conversation history array passed to the API"
+  ]
+}

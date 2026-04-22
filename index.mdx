@@ -1,97 +1,57 @@
 ---
-title: "Introduction"
-description: "Welcome to the new home for your documentation"
+title: "AlonsoChatBot: AI chatbot powered by Groq and LLaMA 3.1"
+description: "AlonsoChatBot runs entirely in your browser using the Groq API and LLaMA 3.1. No server, no install — just open index.html, add your API key, and chat."
 ---
 
-## Setting up
+AlonsoChatBot is a lightweight, browser-based AI chatbot that connects directly to the [Groq API](https://console.groq.com) using the `llama-3.1-8b-instant` model. It runs entirely in your browser — no server required — and features a sleek glassmorphism UI, persistent session memory, and a fully customizable bot personality.
 
-Get your documentation site up and running in minutes.
-
-<Card
-  title="Start here"
-  icon="rocket"
-  href="/quickstart"
-  horizontal
->
-  Follow our three step quickstart guide.
-</Card>
-
-## Make it yours
-
-Design a docs site that looks great and empowers your users.
-
-<Columns cols={2}>
-  <Card
-    title="Edit locally"
-    icon="pen-to-square"
-    href="/development"
-  >
-    Edit your docs locally and preview them in real time.
+<CardGroup cols={2}>
+  <Card title="Quickstart" icon="rocket" href="/quickstart">
+    Get AlonsoChatBot running in your browser in under 5 minutes.
   </Card>
-  <Card
-    title="Customize your site"
-    icon="palette"
-    href="/essentials/settings"
-  >
-    Customize the design and colors of your site to match your brand.
+  <Card title="API key setup" icon="key" href="/configuration/api-key">
+    Get your free Groq API key and activate the chatbot.
   </Card>
-    <Card
-    title="Set up navigation"
-    icon="map"
-    href="/essentials/navigation"
-  >
-    Organize your docs to help users find what they need and succeed with your product.
+  <Card title="Bot personality" icon="wand-magic-sparkles" href="/configuration/bot-personality">
+    Customize your bot's name, tone, and behavior with a system prompt.
   </Card>
-  <Card
-    title="API documentation"
-    icon="terminal"
-    href="/api-reference/introduction"
-  >
-    Auto-generate API documentation from OpenAPI specifications.
+  <Card title="Chat features" icon="message" href="/features/chat-interface">
+    Explore the chat interface, session memory, and settings panel.
   </Card>
-</Columns>
+</CardGroup>
 
-## Create beautiful pages
+## How it works
 
-Everything you need to create world-class documentation.
+AlonsoChatBot sends your messages to the Groq API along with a running conversation history, so the bot remembers the context of your entire session. Your API key is stored locally in your browser and never leaves your machine.
 
-<Columns cols={2}>
-  <Card
-    title="Write with MDX"
-    icon="pen-fancy"
-    href="/essentials/markdown"
-  >
-    Use MDX to style your docs pages.
-  </Card>
-  <Card
-    title="Code samples"
-    icon="code"
-    href="/essentials/code"
-  >
-    Add sample code to demonstrate how to use your product.
-  </Card>
-  <Card
-    title="Images"
-    icon="image"
-    href="/essentials/images"
-  >
-    Display images and other media.
-  </Card>
-  <Card
-    title="Reusable snippets"
-    icon="recycle"
-    href="/essentials/reusable-snippets"
-  >
-    Write once and reuse across your docs.
-  </Card>
-</Columns>
+<Steps>
+  <Step title="Get a free Groq API key">
+    Visit [console.groq.com/keys](https://console.groq.com/keys) and create a free API key. It starts with `gsk_`.
+  </Step>
+  <Step title="Open the chatbot">
+    Open `index.html` in your browser — or serve the project with any static file server.
+  </Step>
+  <Step title="Enter your API key">
+    Paste your Groq API key into the setup overlay. It is saved to `localStorage` so you only need to do this once.
+  </Step>
+  <Step title="Start chatting">
+    Type a message and press **Send**. The bot responds in real time using LLaMA 3.1.
+  </Step>
+</Steps>
 
-## Need inspiration?
+## Key features
 
-<Card
-  title="See complete examples"
-  icon="stars"
-  href="https://mintlify.com/customers"
->
-  Browse our showcase of exceptional documentation sites.
-</Card>
+<CardGroup cols={2}>
+  <Card title="Session memory" icon="brain" href="/features/session-memory">
+    Every message is added to the conversation history so the bot understands context across the entire session.
+  </Card>
+  <Card title="Glassmorphism UI" icon="sparkles" href="/features/chat-interface">
+    Animated background blobs and frosted-glass panels create a modern, polished look.
+  </Card>
+  <Card title="Custom system prompt" icon="sliders" href="/customization/system-prompt">
+    Change the bot's personality at any time without reloading the page.
+  </Card>
+  <Card title="Clear chat history" icon="trash" href="/features/settings">
+    Wipe the conversation and start fresh from the settings panel.
+  </Card>
+</CardGroup>

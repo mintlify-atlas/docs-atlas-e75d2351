@@ -1,0 +1,81 @@
+---
+title: "Customizing the bot personality with a system prompt"
+description: "Learn how the system prompt controls AlonsoChatBot's personality and behavior, and how to edit it during your session using the settings modal."
+---
+
+AlonsoChatBot's personality, language, and tone are controlled by a system prompt — the first message in the conversation history. Every reply the bot generates takes this prompt into account. You can change the system prompt at any time during a session using the settings modal.
+
+## The default system prompt
+
+When you first load the page, the bot's behavior is defined by the system prompt initialized in `app.js`:
+
+```javascript
+let messages = [
+    { role: "system", content: "Eres AlonsoChatBot, un asistente sumamente inteligente, divertido y muy amable. Responde siempre en español con un toque de elegancia." }
+];
+```
+
+This instructs the bot to act as a highly intelligent, fun, and friendly assistant that always responds in Spanish with a touch of elegance. The settings modal textarea is pre-filled with a slightly different version for display purposes — the active prompt that controls the bot is always the value in the `messages[0]` entry above.
+
+## Changing the system prompt
+
+<Steps>
+  <Step title="Open the settings modal">
+    Click the gear icon in the chatbot interface to open the settings modal.
+  </Step>
+  <Step title="Edit the system prompt">
+    In the textarea labeled **Personalidad del Bot:**, clear the existing text and type your new prompt.
+  </Step>
+  <Step title="Save your changes">
+    Click **Guardar Cambios**. The app updates `messages[0].content` with your new text and closes the modal.
+  </Step>
+</Steps>
+
+The change takes effect immediately. The bot uses your new prompt for all subsequent messages in the current session.
+
+<Note>
+  The system prompt is stored in memory only. It resets to the default value when you refresh or close the page. If you want to reuse a custom prompt, keep a copy of it elsewhere.
+</Note>
+
+## Example system prompts
+
+Below are example prompts you can paste into the textarea. Each one changes the bot's behavior without requiring any code changes.
+
+<AccordionGroup>
+  <Accordion title="Formal English assistant">
+    ```text
+    You are a formal and professional assistant. Respond in clear, precise English. Avoid casual language and always be concise and accurate.
+    ```
+  </Accordion>
+  <Accordion title="Coding helper">
+    ```text
+    You are a programming assistant. Help the user debug code, explain concepts, and suggest solutions. Always include code examples with correct syntax highlighting labels. Ask clarifying questions if the problem is ambiguous.
+    ```
+  </Accordion>
+  <Accordion title="Creative writing partner">
+    ```text
+    You are a creative writing partner. Help the user brainstorm ideas, develop characters, and refine prose. Offer imaginative suggestions and constructive feedback. Match the tone and genre the user describes.
+    ```
+  </Accordion>
+</AccordionGroup>
+
+## How the prompt affects responses
+
+The system prompt is sent to the Groq API with every request as the first element of the `messages` array. The model (`llama-3.1-8b-instant`) treats its content as persistent instructions that apply to the entire conversation:
+
+```javascript
+const response = await fetch(GROQ_URL, {
+    method: "POST",
+    headers: {
+        "Authorization": `Bearer ${API_KEY}`,
+        "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+        model: MODEL,
+        messages: messages,  // messages[0] is always the system prompt
+        temperature: 0.7
+    })
+});
+```
+
+Because `messages[0]` is always included in the payload, the prompt you set applies to every response the bot gives for the rest of the session.

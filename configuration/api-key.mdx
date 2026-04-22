@@ -1,0 +1,92 @@
+---
+title: "Get and configure your Groq API key for AlonsoChatBot"
+description: "Learn how to obtain a free Groq API key, activate AlonsoChatBot on first launch, and understand how the key is validated and stored in your browser."
+---
+
+AlonsoChatBot communicates with the Groq API to generate responses. To use the chatbot, you need a free Groq API key. The key is stored locally in your browser and is never sent anywhere other than Groq's servers when a message is processed.
+
+## Getting a Groq API key
+
+<Steps>
+  <Step title="Open the Groq console">
+    Go to [https://console.groq.com/keys](https://console.groq.com/keys) and sign in or create a free account.
+  </Step>
+  <Step title="Create a new API key">
+    Click **Create API Key**, give it a name (for example, `alonso-chatbot`), and confirm. The console displays the key once — copy it before closing the dialog.
+  </Step>
+  <Step title="Enter the key in AlonsoChatBot">
+    When you open AlonsoChatBot for the first time and no key is saved, a setup overlay appears automatically. Paste your key into the input field and click **Activar Mi ChatBot**.
+  </Step>
+</Steps>
+
+## How the setup overlay works
+
+The setup overlay is shown on page load whenever `localStorage` does not contain a value for `GROQ_API_KEY`:
+
+```javascript
+let API_KEY = localStorage.getItem('GROQ_API_KEY') || "";
+
+if (!API_KEY) {
+    setupOverlay.style.display = 'flex';
+} else {
+    setupOverlay.style.display = 'none';
+}
+```
+
+Once you submit a valid key, the overlay is hidden and the chatbot becomes active for the rest of the session.
+
+## Key validation
+
+The app checks that your key starts with `gsk_` before accepting it. If the key does not match this prefix, an alert is shown and the key is not saved:
+
+```javascript
+if (key.startsWith('gsk_')) {
+    API_KEY = key;
+    localStorage.setItem('GROQ_API_KEY', key);
+    setupOverlay.style.display = 'none';
+    alert("¡AlonsoChatBot activado con éxito!");
+} else {
+    alert("Por favor, ingresa una clave válida de Groq (debe empezar con gsk_)");
+}
+```
+
+All valid Groq API keys begin with `gsk_`. If you see the validation error, double-check that you copied the full key from the Groq console without extra whitespace.
+
+## Where the key is stored
+
+Your API key is saved in your browser's `localStorage` under the key `GROQ_API_KEY`:
+
+```javascript
+// Writing the key
+localStorage.setItem('GROQ_API_KEY', key);
+
+// Reading the key on load
+localStorage.getItem('GROQ_API_KEY');
+```
+
+<Note>
+  The key is stored only in your browser's localStorage. It is not sent to any server other than `https://api.groq.com` when the chatbot makes a request on your behalf.
+</Note>
+
+## Updating or resetting the key
+
+There is no in-app UI for replacing a saved key. To update or remove it, use your browser's developer tools:
+
+<Steps>
+  <Step title="Open developer tools">
+    Press `F12` (or `Cmd+Option+I` on macOS) to open the browser's developer tools panel.
+  </Step>
+  <Step title="Navigate to Application storage">
+    Select the **Application** tab, then open **Local Storage** in the left sidebar and click the entry for the page's origin.
+  </Step>
+  <Step title="Edit or delete the entry">
+    Find the row with key `GROQ_API_KEY`. Double-click the value to edit it, or right-click the row and choose **Delete** to remove it entirely.
+  </Step>
+  <Step title="Reload the page">
+    Refresh the page. If the key was deleted, the setup overlay reappears so you can enter a new key.
+  </Step>
+</Steps>
+
+<Warning>
+  Do not share your Groq API key with anyone or commit it to source control. Anyone with your key can make API requests that count against your quota.
+</Warning>

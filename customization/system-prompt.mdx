@@ -1,0 +1,146 @@
+---
+title: "System prompt authoring reference for AlonsoChatBot"
+description: "Deep-dive reference for authoring system prompts that control the bot's language, tone, persona, and topic scope across the entire session."
+---
+
+The system prompt is the foundational instruction that shapes every response AlonsoChatBot produces. It is sent to the model before any user message and remains in effect for the entire conversation session. Writing it well is the single most impactful change you can make to the bot's behavior — more so than any other configuration option.
+
+## How the system prompt works
+
+AlonsoChatBot uses the OpenAI chat completions format. Every API request includes a `messages` array where the first element has `role: "system"`. That element is the system prompt:
+
+```javascript
+let messages = [
+    { role: "system", content: "Eres AlonsoChatBot, un asistente sumamente inteligente, divertido y muy amable. Responde siempre en español con un toque de elegancia." }
+];
+```
+
+Every subsequent user message and assistant reply is appended to the same array:
+
+```javascript
+messages.push({ role: "user", content: prompt });
+// ...
+messages.push({ role: "assistant", content: botText });
+```
+
+The full array — including the system message at index 0 — is sent to the model on every request. This means the model reads your system prompt again with each turn, keeping the instructions in scope for the whole session.
+
+## The default prompt
+
+The default system prompt shipped with AlonsoChatBot is:
+
+```
+Eres AlonsoChatBot, un asistente sumamente inteligente, divertido y muy amable. Responde siempre en español con un toque de elegancia.
+```
+
+This instruction does three things:
+
+1. Gives the bot a name and identity ("AlonsoChatBot").
+2. Sets a tone ("intelligent, fun, and friendly").
+3. Locks the response language to Spanish with an elegant register.
+
+## How the prompt is updated at runtime
+
+When you save a new prompt through the settings modal, `app.js` replaces `messages[0].content` in memory:
+
+```javascript
+saveSettings.addEventListener('click', () => {
+    const newPrompt = systemPromptInput.value.trim();
+    if (newPrompt) {
+        messages[0].content = newPrompt;
+        settingsModal.style.display = 'none';
+    }
+});
+```
+
+The change takes effect immediately — the next message you send will use the new prompt.
+
+<Note>
+  The updated system prompt is stored only in the JavaScript `messages` array, which lives in memory. It is not written to `localStorage`. Refreshing the page resets `messages` to its initial value, restoring the original default prompt.
+</Note>
+
+## Writing effective system prompts
+
+A well-written system prompt is specific, not vague. The model follows concrete instructions more reliably than abstract ones.
+
+<Tip>
+  The more specific your instructions, the more predictable the bot's behavior. Vague prompts like "be helpful" leave too much to the model's interpretation. Precise prompts like "respond in English, keep answers under three sentences, and decline off-topic questions politely" produce consistent results.
+</Tip>
+
+### Language
+
+Specify the language explicitly. Do not assume the model will infer it from context.
+
+```
+Always respond in English, regardless of the language the user writes in.
+```
+
+### Tone and register
+
+Name the tone directly. Common options that models respond well to include: formal, friendly, concise, enthusiastic, calm, or professional.
+
+```
+Your tone is friendly and concise. Avoid jargon unless the user uses it first.
+```
+
+### Persona and name
+
+Giving the bot a name and a brief character description helps it stay consistent across the conversation.
+
+```
+You are Aria, a customer support assistant for Acme Software. You are patient, professional, and solution-focused.
+```
+
+### Topic scope
+
+If you want to restrict the bot to a specific domain, state it plainly and tell the bot how to handle out-of-scope questions.
+
+```
+You are a coding assistant. Only answer questions about programming. If the user asks about anything else, politely redirect them to a programming topic.
+```
+
+### Response length
+
+Models default to verbose answers. If you want short replies, say so explicitly.
+
+```
+Keep all responses to two or three sentences unless the user asks for a detailed explanation.
+```
+
+## Example system prompts
+
+<AccordionGroup>
+  <Accordion title="English-language coding assistant">
+    ```
+    You are CodeBot, an expert programming assistant. You only answer questions about software development, debugging, and computer science concepts. Always respond in English. Provide concise, accurate answers with code examples when relevant. If asked about non-programming topics, politely explain that you are focused on coding questions.
+    ```
+
+    This prompt sets a technical persona, enforces English, constrains the topic to programming, and requests code examples. It also handles off-topic questions gracefully instead of refusing abruptly.
+  </Accordion>
+
+  <Accordion title="Creative writing partner">
+    ```
+    You are Muse, a creative writing collaborator. Help the user develop stories, characters, dialogue, and narrative structure. Be imaginative and encouraging. Match the genre and tone the user sets — if they write dark fiction, engage with it seriously; if they write comedy, play along. Always respond in the language the user writes in.
+    ```
+
+    This prompt adapts to the user's genre and language dynamically, which suits an open-ended creative context better than rigid constraints.
+  </Accordion>
+
+  <Accordion title="Concise factual assistant">
+    ```
+    You are a factual assistant. Answer questions accurately and concisely. Keep every response to three sentences or fewer. Do not add opinions, caveats, or encouragement — only facts. If you are uncertain, say so briefly rather than speculating.
+    ```
+
+    This prompt is useful when you want a no-frills, information-dense assistant. The explicit instruction to avoid opinions and caveats prevents the model from padding answers.
+  </Accordion>
+</AccordionGroup>
+
+## Persistence and session scope
+
+The system prompt you set applies to the current browser session only. The `messages` array is reset each time the page loads, which means:
+
+- Clearing and reloading the page restores the original default prompt from `app.js`.
+- Changing the prompt mid-conversation affects all subsequent messages in that session.
+- Previous messages already sent are not re-evaluated under the new prompt, but the model sees the updated `messages[0]` on every future request.
+
+If you want a custom prompt to persist across page loads, you would need to save it to `localStorage` and read it back on startup — similar to how the API key is handled in `app.js`.

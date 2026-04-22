@@ -1,0 +1,73 @@
+---
+title: "How AlonsoChatBot maintains conversation session memory"
+description: "Learn how AlonsoChatBot stores the full conversation history in memory so the model can reference earlier messages in every API request."
+---
+
+AlonsoChatBot keeps track of everything said during a session by maintaining a `messages` array in JavaScript memory. Every time you send a message, the full history is included in the API request — not just your latest input. This allows the bot to reference what was discussed earlier in the same conversation without any server-side storage.
+
+## How the messages array works
+
+The array is initialized with a single system message when the page loads:
+
+```javascript
+let messages = [
+  { role: "system", content: "Eres AlonsoChatBot, ..." },  // Always index 0
+  { role: "user", content: "Hola, ¿cómo estás?" },
+  { role: "assistant", content: "¡Hola! Estoy muy bien, gracias." }
+];
+```
+
+Each entry follows the OpenAI-compatible message format with a `role` field (`"system"`, `"user"`, or `"assistant"`) and a `content` field containing the text.
+
+## How messages are added
+
+Inside `getAIResponse()`, your message is pushed to the array before the API call, and the bot's reply is pushed after:
+
+```javascript
+messages.push({ role: "user", content: prompt });
+
+// ... API call ...
+
+const botText = data.choices[0].message.content;
+messages.push({ role: "assistant", content: botText });
+```
+
+This means `messages` grows by two entries for every exchange. When the next request is made, the Groq API receives the complete history and can use it to produce a contextually aware response.
+
+## What gets sent to the API
+
+On every request, the full `messages` array is serialized into the request body alongside the model name and temperature:
+
+```javascript
+body: JSON.stringify({
+    model: "llama-3.1-8b-instant",
+    messages: messages,
+    temperature: 0.7
+})
+```
+
+A `temperature` of `0.7` balances creativity with coherence — responses vary naturally without becoming erratic.
+
+## The system prompt
+
+`messages[0]` always holds the system prompt. It is never removed during normal conversation; only its `.content` property can be updated through the settings panel. Because it is included in every API request, it consistently shapes the bot's tone, language, and personality regardless of how long the conversation grows.
+
+## Clearing chat history
+
+Clicking "Borrar Historial de Chat" in the settings modal resets the array to just the system prompt:
+
+```javascript
+if (confirm("¿Estás seguro de que quieres borrar toda la conversación?")) {
+    messages = [messages[0]];
+}
+```
+
+The `messages[0]` slice preserves the current system prompt (including any edits you made in settings) while discarding all user and assistant turns. After clearing, the bot greets you fresh, with no knowledge of previous messages.
+
+<Note>
+Session memory exists only in the browser's JavaScript runtime. Refreshing or closing the page resets `messages` to its initial single-entry state, and all conversation history is lost. There is no persistent storage between sessions.
+</Note>
+
+<Tip>
+Because the system prompt at `messages[0]` survives a chat clear and is sent on every request, you can use it to encode information you want the bot to always remember — such as your name, preferred language, or a specific persona — even after wiping the conversation history.
+</Tip>
